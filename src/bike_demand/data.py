@@ -5,9 +5,9 @@ from __future__ import annotations
 import argparse
 from collections.abc import Sequence
 from pathlib import Path
+from typing import cast
 
 import pandas as pd
-from sklearn.model_selection import train_test_split
 
 from bike_demand.config import (
     CATEGORICAL_FEATURES,
@@ -64,20 +64,21 @@ def clean(df: pd.DataFrame) -> pd.DataFrame:
     result = result[result[TARGET] >= 0]
     result = result.drop_duplicates().reset_index(drop=True)
     result[TARGET] = result[TARGET].astype(int)
-    return result[list(REQUIRED_COLUMNS)]
+    return cast(pd.DataFrame, result[list(REQUIRED_COLUMNS)])
 
 
 def split_features_target(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series]:
     """Split a cleaned dataframe into features ``X`` and target ``y``."""
     validate_columns(df)
-    return df.drop(columns=[TARGET]), df[TARGET]
+    return df.drop(columns=[TARGET]), cast(pd.Series, df[TARGET])
 
 
 def train_test_split_df(
     df: pd.DataFrame, test_size: float = 0.2, random_state: int = RANDOM_STATE
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Randomly split a cleaned dataframe into train and test parts."""
-    train, test = train_test_split(df, test_size=test_size, random_state=random_state)
+    test = df.sample(frac=test_size, random_state=random_state)
+    train = cast(pd.DataFrame, df[~df.index.isin(test.index)])
     return train.reset_index(drop=True), test.reset_index(drop=True)
 
 
