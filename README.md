@@ -65,6 +65,29 @@ pre-commit run --all-files
 pre-commit run --hook-stage manual --all-files
 ```
 
+## Training and model registry (MLflow)
+
+```powershell
+mlflow server --backend-store-uri sqlite:///mlflow.db --artifacts-destination ./mlartifacts --host 127.0.0.1 --port 5000
+python -m bike_demand.train      # in a second terminal
+```
+
+`bike_demand.train` implements the automatic model improvement and degradation protection:
+
+1. **Hyperparameter selection** – every candidate of the random forest parameter grid is evaluated
+   with 3-fold cross-validation as a nested MLflow run; the one with the lowest CV RMSE is selected.
+2. **Evaluation and registration** – the selected model is trained, evaluated on a held-out test set
+   (RMSE, MAE, R²) and registered in the MLflow model registry (`seoul-bike-demand-model`).
+3. **Guarded promotion** – the new version only receives the `champion` alias (the version served by
+   the API) if its test RMSE is not worse than the current champion's. Every version is tagged with
+   `promoted=true/false` and the previous champion's RMSE.
+
+Logged artifacts: the model (with signature) and the training data as `reference/reference.csv`,
+which is the reference dataset of the Evidently drift report.
+
+![MLflow experiments](docs/screenshots/mlflow_experiments.png)
+![MLflow model registry](docs/screenshots/mlflow_models.png)
+
 ## Commit message convention
 
 [Conventional Commits](https://www.conventionalcommits.org/): `<type>(<scope>): <description>`,
