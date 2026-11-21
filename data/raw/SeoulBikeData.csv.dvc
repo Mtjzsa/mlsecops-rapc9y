@@ -1,0 +1,5 @@
+outs:
+- md5: bf632307dcb419f67df589faaa0318e1
+  size: 604166
+  hash: md5
+  path: SeoulBikeData.csv
