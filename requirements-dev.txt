@@ -9,3 +9,4 @@ pre-commit==4.0.1
 dvc==3.56.0
 matplotlib==3.9.2
 ipykernel==6.29.5
+pathspec==0.12.1  # dvc 3.56 is incompatible with pathspec>=1.0 (_DIR_MARK removed)
