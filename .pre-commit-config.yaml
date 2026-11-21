@@ -1,0 +1,48 @@
+# Git hooks, run automatically by `git commit` (and by GitHub Actions on every push / PR).
+# Install once:  pre-commit install
+default_install_hook_types: [pre-commit, commit-msg]
+default_stages: [pre-commit]
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=1000"]
+
+  # PEP8 check (line length 120, see .flake8)
+  - repo: https://github.com/PyCQA/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+
+  # Enforce Conventional Commits messages, e.g. "feat(api): add predict endpoint"
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.0.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+
+  # Type checking and tests need the project's virtualenv, so they run in CI on every push/PR.
+  # Locally:  pre-commit run --hook-stage manual --all-files   (with the venv activated)
+  - repo: local
+    hooks:
+      - id: pyright
+        name: pyright (standard mode, src/)
+        entry: pyright
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [manual]
+      - id: pytest-cov
+        name: pytest with coverage (min. 95%)
+        entry: pytest --cov
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [manual]
