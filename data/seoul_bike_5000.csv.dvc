@@ -1,0 +1,5 @@
+outs:
+- md5: eab6c9057858cbaec791b69650994568
+  size: 372156
+  hash: md5
+  path: seoul_bike_5000.csv
