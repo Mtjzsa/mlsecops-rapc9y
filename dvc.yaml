@@ -1,0 +1,9 @@
+stages:
+  preprocess:
+    cmd: python -m bike_demand.data data/seoul_bike_5000.csv data/processed/seoul_bike_processed.csv
+    deps:
+      - data/seoul_bike_5000.csv
+      - src/bike_demand/data.py
+      - src/bike_demand/config.py
+    outs:
+      - data/processed/seoul_bike_processed.csv
