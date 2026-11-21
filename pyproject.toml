@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bike-demand"
+version = "0.1.0"
+description = "Seoul bike sharing demand prediction with an MLOps pipeline (MLflow, FastAPI, Evidently)"
+authors = [{ name = "Józsa Máté Szabolcs" }]
+requires-python = ">=3.11"
+readme = "README.md"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra"
+
+[tool.coverage.run]
+# Test code is measured too: a test that never runs is also a defect.
+source = ["src", "tests"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 95
+show_missing = true
+skip_covered = false
+
+[tool.pyright]
+include = ["src"]
+typeCheckingMode = "standard"
+pythonVersion = "3.11"
