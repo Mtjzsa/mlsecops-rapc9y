@@ -1,0 +1,23 @@
+schema: '2.0'
+stages:
+  preprocess:
+    cmd: python -m bike_demand.data data/seoul_bike_5000.csv
+      data/processed/seoul_bike_processed.csv
+    deps:
+    - path: data/seoul_bike_5000.csv
+      hash: md5
+      md5: eab6c9057858cbaec791b69650994568
+      size: 372156
+    - path: src/bike_demand/config.py
+      hash: md5
+      md5: 3a24c8634499dfa06b786ea81726c315
+      size: 2207
+    - path: src/bike_demand/data.py
+      hash: md5
+      md5: 45b2d4dacbee7d6f9a65004af592dc34
+      size: 4339
+    outs:
+    - path: data/processed/seoul_bike_processed.csv
+      hash: md5
+      md5: 16404f582cf925997d19eb265962b6c7
+      size: 372114
