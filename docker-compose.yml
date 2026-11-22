@@ -1,6 +1,7 @@
 # The whole system starts with:  docker compose up --build
 #   MLflow UI:     http://localhost:5000
 #   REST API:      http://localhost:8000/docs
+#   Streamlit:     http://localhost:8501
 x-app: &app
   build: .
   image: seoul-bike-demand:latest
@@ -56,6 +57,24 @@ services:
       interval: 10s
       timeout: 5s
       retries: 6
+  streamlit:
+    <<: *app
+    container_name: streamlit
+    command: ["streamlit", "run", "app/streamlit_app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]
+    environment:
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      DATA_PATH: /app/data/seoul_bike_5000.csv
+      LOG_DIR: /app/logs
+      API_URL: http://api:8000
+      STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/app/data:ro
+      - logs:/app/logs:ro
+    depends_on:
+      api:
+        condition: service_healthy
 
 volumes:
   mlflow-data:
