@@ -27,11 +27,12 @@ dvc pull                      # restores data/seoul_bike_5000.csv
 docker compose up --build
 ```
 
-| Service   | URL                        | Description                                                                                         |
-| --------- | -------------------------- | --------------------------------------------------------------------------------------------------- |
-| `mlflow`  | http://localhost:5000      | MLflow tracking server + model registry (SQLite + artifacts on a Docker volume)                     |
-| `trainer` | –                          | one-shot job: trains the first model if there is no champion yet (`--skip-if-champion`), then exits |
-| `api`     | http://localhost:8000/docs | FastAPI REST API (`/train`, `/predict`, `/health`)                                                  |
+| Service     | URL                        | Description                                                                                         |
+| ----------- | -------------------------- | --------------------------------------------------------------------------------------------------- |
+| `mlflow`    | http://localhost:5000      | MLflow tracking server + model registry (SQLite + artifacts on a Docker volume)                     |
+| `trainer`   | –                          | one-shot job: trains the first model if there is no champion yet (`--skip-if-champion`), then exits |
+| `api`       | http://localhost:8000/docs | FastAPI REST API (`/train`, `/predict`, `/health`)                                                  |
+| `streamlit` | http://localhost:8501      | monitoring dashboard with the Evidently drift report                                                |
 
 All services use the same image (`Dockerfile`, non-root user). Request logs are stored on the `logs` volume.
 `docker compose down -v` removes the containers and the volumes (MLflow history and logs).
@@ -129,6 +130,18 @@ no trained model yet → `503`.
 
 ![Swagger predict](docs/screenshots/api_predict.png)
 ![Swagger train](docs/screenshots/api_train.png)
+
+## Monitoring (Evidently + Streamlit)
+
+Dashboard: http://localhost:8501 (`app/streamlit_app.py` – a thin UI layer, the logic is in `bike_demand.monitoring`).
+
+1. **API status** – `/health` of the REST API.
+2. **Request simulation** – random dataset rows are sent to `/predict`; a temperature shift simulates data drift.
+3. **Evidently data drift report** – reference: the champion's training data (MLflow artifact
+   `reference/reference.csv`), current: all logged `/predict` requests (`logs/predictions.csv`).
+   The summary metrics and the HTML report are also logged to MLflow (`seoul-bike-demand-monitoring` experiment).
+
+![Streamlit + Evidently](docs/screenshots/streamlit_evidently.png)
 
 ## Commit message convention
 
