@@ -55,7 +55,7 @@ def settings(tmp_path: Path) -> Settings:
     tracking_uri = f"sqlite:///{(tmp_path / 'mlflow.db').as_posix()}"
     mlflow.set_tracking_uri(tracking_uri)
     # Artifacts go to the temporary directory instead of ./mlruns
-    for experiment in ("test-experiment", "test-experiment-predictions"):
+    for experiment in ("test-experiment", "test-experiment-predictions", "test-experiment-monitoring"):
         mlflow.create_experiment(experiment, artifact_location=(tmp_path / "artifacts" / experiment).as_uri())
     return Settings(
         data_path=tmp_path / "data.csv",
