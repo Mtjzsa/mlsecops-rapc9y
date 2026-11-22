@@ -88,6 +88,30 @@ which is the reference dataset of the Evidently drift report.
 ![MLflow experiments](docs/screenshots/mlflow_experiments.png)
 ![MLflow model registry](docs/screenshots/mlflow_models.png)
 
+## REST API (FastAPI)
+
+```powershell
+uvicorn bike_demand.api:app --reload --port 8000    # Swagger UI: http://localhost:8000/docs
+```
+
+| Endpoint        | Description                                                                                                                             |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /health`   | status, whether a model is loaded and its version                                                                                       |
+| `POST /train`   | retrains on the dataset (hyperparameter selection, MLflow logging); the new version is only served if it is not worse than the champion |
+| `POST /predict` | predicts hourly rentals for 1–1000 records with the champion model                                                                      |
+
+Every request is logged:
+
+- `/predict`: inputs + predictions appended to `logs/predictions.csv` (input of the Evidently drift report)
+  and saved as an MLflow run artifact in the `seoul-bike-demand-predictions` experiment,
+- `/train`: result appended to `logs/training.csv`, the model and the reference data are MLflow artifacts.
+
+Input validation (Pydantic): value ranges (e.g. `hour` 0–23) and allowed categories; invalid input → `422`,
+no trained model yet → `503`.
+
+![Swagger predict](docs/screenshots/api_predict.png)
+![Swagger train](docs/screenshots/api_train.png)
+
 ## Commit message convention
 
 [Conventional Commits](https://www.conventionalcommits.org/): `<type>(<scope>): <description>`,
