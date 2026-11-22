@@ -182,11 +182,19 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Command line entry point: ``python -m bike_demand.train [--data PATH]``."""
     parser = argparse.ArgumentParser(description="Train the bike demand model and log it to MLflow.")
     parser.add_argument("--data", type=Path, default=None, help="dataset CSV (default: DATA_PATH env var)")
+    parser.add_argument(
+        "--skip-if-champion", action="store_true", help="do nothing if a champion model exists (container start-up)"
+    )
     args = parser.parse_args(argv)
 
     settings = Settings.from_env()
     if args.data is not None:
         settings = replace(settings, data_path=args.data)
+    if args.skip_if_champion:
+        mlflow.set_tracking_uri(settings.mlflow_tracking_uri)
+        if get_champion_rmse(MlflowClient(), settings.model_name) is not None:
+            print("Champion model already exists - skipping training")
+            return 0
     result = run_training(settings)
     status = "promoted to champion" if result.promoted else "NOT promoted (worse than champion)"
     print(f"Model version {result.model_version}: rmse={result.metrics['rmse']:.1f}, {status}")

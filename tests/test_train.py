@@ -96,3 +96,19 @@ def test_main_cli(
 
     assert main(["--data", str(settings.data_path)]) == 0
     assert "promoted to champion" in capsys.readouterr().out
+
+
+def test_main_skip_if_champion(
+    raw_df: pd.DataFrame, settings: Settings, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    raw_df.to_csv(settings.data_path, index=False)
+    monkeypatch.setenv("MLFLOW_TRACKING_URI", settings.mlflow_tracking_uri)
+    monkeypatch.setenv("MLFLOW_EXPERIMENT_NAME", settings.experiment_name)
+    monkeypatch.setattr("bike_demand.train.DEFAULT_PARAM_GRID", GOOD_GRID)
+    args = ["--data", str(settings.data_path), "--skip-if-champion"]
+
+    assert main(args) == 0  # no champion yet -> trains
+    assert main(args) == 0  # champion exists -> skips
+    output = capsys.readouterr().out
+    assert "promoted to champion" in output
+    assert "skipping training" in output
