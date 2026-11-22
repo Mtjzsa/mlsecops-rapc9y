@@ -247,21 +247,6 @@ streamlit run app/streamlit_app.py
 ![pytest coverage](docs/screenshots/pytest_coverage.png)
 ![GitHub Actions](docs/screenshots/github_actions.png)
 
-## Use of AI
-
-An AI assistant (Claude, Anthropic) was used throughout the project, as recommended in the assignment:
-
-- **Planning:** dataset selection, architecture, splitting the work into feature branches and commits.
-- **Code and configuration drafts:** the modules in `src/`, the tests, the Dockerfile, Docker Compose,
-  the GitHub Actions workflow, the pre-commit and tool configuration, the README.
-- **Debugging:** dependency conflicts (`pathspec` with DVC, `sqlalchemy` with MLflow), pyright type errors
-  with pandas/MLflow, a coverage data combine error caused by MLflow subprocesses.
-
-How: the assistant proposed the code step by step; I created the files, ran every check locally
-(pytest, coverage, flake8, pyright, Docker), reported the errors back, applied the fixes and made all
-commits, pull requests and merges myself. The screenshots show the system running on my machine.
-I reviewed the generated code and can explain every component.
-
 ## Known limitations and technical debt
 
 - **Airflow (extra) was not implemented**, and pyright runs in standard mode (the strict mode extra
