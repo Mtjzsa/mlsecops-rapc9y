@@ -15,6 +15,7 @@ RUN pip install -r requirements.txt
 COPY pyproject.toml README.md ./
 COPY src ./src
 RUN pip install --no-deps .
+COPY app ./app
 
 # Run as a non-root user; /app/logs and /mlflow are mounted as volumes
 RUN useradd --create-home appuser \
@@ -22,5 +23,5 @@ RUN useradd --create-home appuser \
     && chown -R appuser:appuser /app /mlflow
 USER appuser
 
-EXPOSE 8000
+EXPOSE 8000 8501
 CMD ["uvicorn", "bike_demand.api:app", "--host", "0.0.0.0", "--port", "8000"]
