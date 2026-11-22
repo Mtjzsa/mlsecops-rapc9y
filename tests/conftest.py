@@ -1,11 +1,14 @@
 """Shared test fixtures: a small synthetic dataset in the original UCI format."""
-
 from __future__ import annotations
 
+from pathlib import Path
+
+import mlflow
 import numpy as np
 import pandas as pd
 import pytest
 
+from bike_demand.config import Settings
 from bike_demand.data import clean
 
 
@@ -44,3 +47,20 @@ def raw_df() -> pd.DataFrame:
 @pytest.fixture
 def clean_df(raw_df: pd.DataFrame) -> pd.DataFrame:
     return clean(raw_df)
+
+
+@pytest.fixture
+def settings(tmp_path: Path) -> Settings:
+    """Settings pointing to a throw-away SQLite MLflow store in a temporary directory."""
+    tracking_uri = f"sqlite:///{(tmp_path / 'mlflow.db').as_posix()}"
+    mlflow.set_tracking_uri(tracking_uri)
+    # Artifacts go to the temporary directory instead of ./mlruns
+    for experiment in ("test-experiment", "test-experiment-predictions"):
+        mlflow.create_experiment(experiment, artifact_location=(tmp_path / "artifacts" / experiment).as_uri())
+    return Settings(
+        data_path=tmp_path / "data.csv",
+        log_dir=tmp_path / "logs",
+        mlflow_tracking_uri=tracking_uri,
+        experiment_name="test-experiment",
+        model_name="test-model",
+    )
