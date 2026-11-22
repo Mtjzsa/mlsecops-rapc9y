@@ -1,0 +1,62 @@
+# The whole system starts with:  docker compose up --build
+#   MLflow UI:     http://localhost:5000
+#   REST API:      http://localhost:8000/docs
+x-app: &app
+  build: .
+  image: seoul-bike-demand:latest
+  environment:
+    MLFLOW_TRACKING_URI: http://mlflow:5000
+    DATA_PATH: /app/data/seoul_bike_5000.csv
+    LOG_DIR: /app/logs
+
+services:
+  mlflow:
+    <<: *app
+    container_name: mlflow
+    command: >
+      mlflow server
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --artifacts-destination /mlflow/artifacts
+      --host 0.0.0.0 --port 5000
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow-data:/mlflow
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  # One-shot job: trains the first model if the registry has no champion yet, then exits
+  trainer:
+    <<: *app
+    container_name: trainer
+    command: ["python", "-m", "bike_demand.train", "--skip-if-champion"]
+    volumes:
+      - ./data:/app/data:ro
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    <<: *app
+    container_name: api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data:ro
+      - logs:/app/logs
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+volumes:
+  mlflow-data:
+  logs:
