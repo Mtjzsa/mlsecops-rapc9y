@@ -30,21 +30,6 @@ GOOD_GRID = ({"n_estimators": 20, "max_depth": 8}, {"n_estimators": 10, "max_dep
 BAD_GRID = ({"n_estimators": 5, "max_depth": 1},)
 
 
-@pytest.fixture
-def settings(tmp_path: Path) -> Settings:
-    tracking_uri = f"sqlite:///{(tmp_path / 'mlflow.db').as_posix()}"
-    # Artifacts go to the temporary directory instead of ./mlruns
-    mlflow.set_tracking_uri(tracking_uri)
-    mlflow.create_experiment("test-experiment", artifact_location=(tmp_path / "artifacts").as_uri())
-    return Settings(
-        data_path=tmp_path / "data.csv",
-        log_dir=tmp_path / "logs",
-        mlflow_tracking_uri=tracking_uri,
-        experiment_name="test-experiment",
-        model_name="test-model",
-    )
-
-
 def test_evaluate_returns_regression_metrics(clean_df: pd.DataFrame) -> None:
     features, target = split_features_target(clean_df)
     model = build_model({"n_estimators": 10}).fit(features, target)
