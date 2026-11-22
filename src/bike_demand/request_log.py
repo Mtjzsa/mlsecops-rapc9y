@@ -33,7 +33,7 @@ class RequestLog:
     def log_prediction(self, features: pd.DataFrame, predictions: Sequence[float], model_version: str | None) -> None:
         rows = features.copy()
         rows.insert(0, "timestamp", _now())
-        rows.insert(1, "model_version", model_version)
+        rows.insert(1, "model_version", model_version or "")  # empty if no model version is known
         rows["prediction"] = list(predictions)
         _append(self.predictions_path, rows)
 
