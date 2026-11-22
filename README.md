@@ -20,6 +20,24 @@ The sampling is documented and reproducible in
 
 Target variable: `Rented Bike Count` (`rented_bike_count`) – regression.
 
+## Quick start (Docker)
+
+```powershell
+dvc pull                      # restores data/seoul_bike_5000.csv
+docker compose up --build
+```
+
+| Service   | URL                        | Description                                                                                         |
+| --------- | -------------------------- | --------------------------------------------------------------------------------------------------- |
+| `mlflow`  | http://localhost:5000      | MLflow tracking server + model registry (SQLite + artifacts on a Docker volume)                     |
+| `trainer` | –                          | one-shot job: trains the first model if there is no champion yet (`--skip-if-champion`), then exits |
+| `api`     | http://localhost:8000/docs | FastAPI REST API (`/train`, `/predict`, `/health`)                                                  |
+
+All services use the same image (`Dockerfile`, non-root user). Request logs are stored on the `logs` volume.
+`docker compose down -v` removes the containers and the volumes (MLflow history and logs).
+
+![Docker containers](docs/screenshots/docker_containers.png)
+
 ## Local development setup (Windows, PowerShell)
 
 ```powershell
